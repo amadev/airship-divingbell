@@ -122,6 +122,75 @@ access. Ex::
           - ssh-rsa AAAAB3N... key1-comment
           - ssh-rsa AAAAVY6... key2-comment
 
+apparmor
+^^^^^^^^
+
+Used to manage host level apparmor profiles/rules, Ex::
+
+    conf:
+      apparmor:
+        profile-1: |
+          #include <tunables/global>
+            /usr/sbin/profile-1 {
+              #include <abstractions/apache2-common>
+              #include <abstractions/base>
+              #include <abstractions/nis>
+
+              capability dac_override,
+              capability dac_read_search,
+              capability net_bind_service,
+              capability setgid,
+              capability setuid,
+
+              /data/www/safe/* r,
+              deny /data/www/unsafe/* r,
+            }
+        profile-2: |
+          #include <tunables/global>
+            /usr/sbin/profile-2 {
+              #include <abstractions/apache2-common>
+              #include <abstractions/base>
+              #include <abstractions/nis>
+
+              capability dac_override,
+              capability dac_read_search,
+              capability net_bind_service,
+              capability setgid,
+              capability setuid,
+
+              /data/www/safe/* r,
+              deny /data/www/unsafe/* r,
+            }
+
+Setting apparmor profiles
+"""""""""""""""""""""""""
+
+The way apparmor loading/unloading implemented is through saving
+settings to a file and than running ``apparmor_parser`` command.
+It's easy to mess up host with rules, if profile names would
+distinguish from file content. Ex::
+
+    conf:
+      apparmor:
+        profile-1: |
+          #include <tunables/global>
+            /usr/sbin/profile-1 {
+              #include <abstractions/base>
+              capability setgid,
+            }
+        profile-2: |
+          #include <tunables/global>
+            /usr/sbin/profile-1 {
+              #include <abstractions/base>
+              capability net_bind_service,
+            }
+
+Even when profiles are different (profile-1 vs profile-2) - filenames
+are the same (profile-1), that means that only one set of rules in
+memory would be active for particular profile (either setgid or
+net_bind_service), but not both. Such problems are hard to debug, so
+caution needed while setting configs up.
+
 Setting user passwords
 """"""""""""""""""""""
 
@@ -253,4 +322,3 @@ Recorded Demo
 -------------
 
 A recorded demo of using Divingbell can be found `here <https://asciinema.org/a/beJQZpRPdOctowW0Lxkxrhz17>`_.
-

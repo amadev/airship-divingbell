@@ -48,6 +48,13 @@ pod:
           max_unavailable: 100%
   resources:
     enabled: false
+    apparmor:
+      limits:
+        memory: "128Mi"
+        cpu: "100m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
     ethtool:
       limits:
         memory: "128Mi"
@@ -82,3 +89,4 @@ manifests:
   daemonset_mounts: true
   daemonset_uamlite: true
   daemonset_sysctl: true
+  daemonset_apparmor: true
